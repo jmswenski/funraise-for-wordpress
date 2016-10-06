@@ -1,41 +1,39 @@
 <?php
 /**
- * WordPress Widget Boilerplate
+ * Funraise for WordPress Widget 
  *
- * The WordPress Widget Boilerplate is an organized, maintainable boilerplate for building widgets using WordPress best practices.
+ * This widget makes it easier for you to add a Funraise form to your Wordpress site.
  *
- * @package   Widget_Name
- * @author    Your Name <email@example.com>
+ * @package   Funraise_For_Wordpress
+ * @author    Jason Swenski <jason@funraise.io>
  * @license   GPL-2.0+
- * @link      http://example.com
- * @copyright 2014 Your Name or Company Name
+ * @link      https://funraise.io
+ * @copyright 2016 Funraise Inc
  *
  * @wordpress-plugin
- * Plugin Name:       @TODO
- * Plugin URI:        @TODO
- * Description:       @TODO
+ * Plugin Name:       Funraise for Wordpress
+ * Plugin URI:        https://funraise.io
+ * Description:       This widget makes it easier for you to add a Funraise form to your Wordpress site.
  * Version:           1.0.0
- * Author:            @TODO
- * Author URI:        @TODO
- * Text Domain:       widget-name
+ * Author:            Funraise Team
+ * Author URI:        https://funraise.io
+ * Text Domain:       funraise-for-wordpress
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Domain Path:       /lang
  * GitHub Plugin URI: https://github.com/<owner>/<repo>
  */
- 
+
  // Prevent direct file access
 if ( ! defined ( 'ABSPATH' ) ) {
 	exit;
 }
 
-// TODO: change 'Widget_Name' to the name of your plugin
-class Widget_Name extends WP_Widget {
+class Funraise_For_Wordpress extends WP_Widget {
 
     /**
-     * @TODO - Rename "widget-name" to the name your your widget
      *
-     * Unique identifier for your widget.
+     * Unique identifier for widget.
      *
      *
      * The variable name is used as the text domain when internationalizing strings
@@ -46,7 +44,7 @@ class Widget_Name extends WP_Widget {
      *
      * @var      string
      */
-    protected $widget_slug = 'widget-name';
+    protected $widget_slug = 'funraise-for-wordpress';
 
 	/*--------------------------------------------------*/
 	/* Constructor
@@ -59,19 +57,17 @@ class Widget_Name extends WP_Widget {
 	public function __construct() {
 
 		// load plugin text domain
-		add_action( 'init', array( $this, 'widget_textdomain' ) );
+		add_action( 'init', array( $this, 'funraise-for-wordpress' ) );
 
 		// Hooks fired when the Widget is activated and deactivated
 		register_activation_hook( __FILE__, array( $this, 'activate' ) );
 		register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
-
-		// TODO: update description
 		parent::__construct(
 			$this->get_widget_slug(),
-			__( 'Widget Name', $this->get_widget_slug() ),
+			__( 'Funraise for Wordpress', $this->get_widget_slug() ),
 			array(
 				'classname'  => $this->get_widget_slug().'-class',
-				'description' => __( 'Short description of the widget goes here.', $this->get_widget_slug() )
+				'description' => __( 'This widget makes it easier for you to add a Funraise form to your Wordpress site', $this->get_widget_slug() )
 			)
 		);
 
@@ -82,6 +78,7 @@ class Widget_Name extends WP_Widget {
 		// Register site styles and scripts
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_widget_styles' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_widget_scripts' ) );
+
 
 		// Refreshing the widget's cached output with each new post
 		add_action( 'save_post',    array( $this, 'flush_widget_cache' ) );
@@ -164,9 +161,11 @@ class Widget_Name extends WP_Widget {
 
 		$instance = $old_instance;
 
-		// TODO: Here is where you update your widget's old values with the new, incoming values
-
+		$instance = array();
+		$instance['form_id'] = ( ! empty( $new_instance['form_id'] ) ) ? strip_tags( $new_instance['form_id'] ) : '';
+	
 		return $instance;
+
 
 	} // end widget
 
@@ -182,7 +181,7 @@ class Widget_Name extends WP_Widget {
 			(array) $instance
 		);
 
-		// TODO: Store the values of the widget in their own variable
+		$form_id = ( isset ($instance['form_id'] ) ) ? esc_attr($instance['form_id']) : '';
 
 		// Display the admin form
 		include( plugin_dir_path(__FILE__) . 'views/admin.php' );
@@ -198,7 +197,6 @@ class Widget_Name extends WP_Widget {
 	 */
 	public function widget_textdomain() {
 
-		// TODO be sure to change 'widget-name' to the name of *your* plugin
 		load_plugin_textdomain( $this->get_widget_slug(), false, plugin_dir_path( __FILE__ ) . 'lang/' );
 
 	} // end widget_textdomain
@@ -253,11 +251,69 @@ class Widget_Name extends WP_Widget {
 	 */
 	public function register_widget_scripts() {
 
+		wp_enqueue_script( 'funraise', 'https://d2n4tvy2wsd0oo.cloudfront.net/widget/common/1.3/funraise.js');
 		wp_enqueue_script( $this->get_widget_slug().'-script', plugins_url( 'js/widget.js', __FILE__ ), array('jquery') );
 
 	} // end register_widget_scripts
 
 } // end class
 
-// TODO: Remember to change 'Widget_Name' to match the class name definition
-add_action( 'widgets_init', create_function( '', 'register_widget("Widget_Name");' ) );
+function funraise_widget($atts) {
+    
+    global $wp_widget_factory;
+    
+    extract(shortcode_atts(array(
+        'form_id' => FALSE
+    ), $atts));
+    
+    $widget_name = 'Funraise_For_Wordpress';
+    
+    if (!is_a($wp_widget_factory->widgets[$widget_name], 'WP_Widget')):
+        $wp_class = 'WP_Widget_'.ucwords(strtolower($class));
+        
+        if (!is_a($wp_widget_factory->widgets[$wp_class], 'WP_Widget')):
+            return '<p>'.sprintf(__("%s: Widget class not found. Make sure this widget exists and the class name is correct"),'<strong>'.$class.'</strong>').'</p>';
+        else:
+            $class = $wp_class;
+        endif;
+    endif;
+    
+    ob_start();
+    the_widget($widget_name, $atts, array('widget_id'=>'arbitrary-instance-'.$id,
+        'before_widget' => '',
+        'after_widget' => '',
+        'before_title' => '',
+        'after_title' => ''
+    ));
+    $output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+    
+}
+add_shortcode('funraise','funraise_widget'); 
+
+add_action('admin_menu', 'funraise_create_menu');
+
+function funraise_create_menu() {
+	//create new top-level menu
+	add_menu_page('Funraise For Wordpress', 'Funraise', 'administrator', __FILE__, 'funraise_settings_page' , plugins_url('/images/icon.png', __FILE__) );
+	//call register settings function
+	add_action( 'admin_init', 'register_funraise_settings' );
+}
+
+function register_funraise_settings() {
+	//register our settings
+	register_setting( 'funraise-settings-group', 'organization_uuid' );
+
+}
+
+function funraise_settings_page() {
+    ob_start();
+	include( plugin_dir_path( __FILE__ ) . 'views/settings.php' );
+	$widget_settings .= ob_get_clean();
+	print $widget_settings;
+}
+
+
+add_action( 'widgets_init', create_function( '', 'register_widget("Funraise_For_Wordpress");' ) );
+
