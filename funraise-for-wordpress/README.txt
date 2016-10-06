@@ -1,8 +1,7 @@
 === Widget Name ===
 
-Contributors: username1, username2 (this should be a list of wordpress.org userid's)
-Donate link: http://example.com/
-Tags: widget, boilerplate
+Contributors: jswenski
+Tags: funraise, non-profit, fundraising 
 Requires at least: 3.3.1
 Tested up to: 3.8.1
 Stable tag: 4.3
