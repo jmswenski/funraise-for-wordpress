@@ -261,15 +261,19 @@ class Funraise_For_Wordpress extends WP_Widget {
 	} // end register_widget_scripts
 
     /**
-	 * Generates widget shortocde
+	 * Generates widget contents for shortcode
 	 */
 	public static function funraise_widget_by_shortcode($atts) {
     
 	    global $wp_widget_factory;
 	    
 	    extract(shortcode_atts(array(
-	        'form_id' => FALSE
+	        'form_id' => FALSE,
+	        'popup' => FALSE,
+	        'default_button' => FALSE,
+	        'structured_state_country' => FALSE
 	    ), $atts));
+
 	    
 	    $widget_name = 'Funraise_For_Wordpress';
 	    
@@ -295,6 +299,26 @@ class Funraise_For_Wordpress extends WP_Widget {
    		return $output;
     
 	}
+
+    /**
+	 * Generates widget button contents for shortcode
+	 */
+	public static function funraise_button_by_shortcode($atts) {
+    	    
+	    extract(shortcode_atts(array(
+	        'form_id' => FALSE,
+	        'text' => FALSE,
+	        'class' => FALSE,
+	        'amount' => FALSE
+	    ), $atts));
+
+	    $instance = $atts;
+	    
+	    ob_start();
+		include( plugin_dir_path( __FILE__ ) . 'views/button.php' );
+   		return ob_get_clean();
+	}
+
 
     /**
 	 * Creates global settings menu page for plugin
