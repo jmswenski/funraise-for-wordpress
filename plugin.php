@@ -44,7 +44,7 @@ class Funraise_For_Wordpress extends WP_Widget {
      *
      * @var      string
      */
-    protected $widget_slug = 'funraise-for-wordpress';
+    protected $widget_slug = 'funraise_for_wordpress';
 
 	/*--------------------------------------------------*/
 	/* Constructor
@@ -57,7 +57,7 @@ class Funraise_For_Wordpress extends WP_Widget {
 	public function __construct() {
 
 		// load plugin text domain
-		add_action( 'init', array( $this, 'funraise-for-wordpress' ) );
+		add_action( 'init', array( $this, 'funraise_for_wordpress' ) );
 
 		// Hooks fired when the Widget is activated and deactivated
 		register_activation_hook( __FILE__, array( $this, 'activate' ) );
@@ -201,6 +201,10 @@ class Funraise_For_Wordpress extends WP_Widget {
 
 	} // end widget_textdomain
 
+	public function funraise_for_wordpress() {
+		//TODO - text domain
+	}
+
 	/**
 	 * Fired when the plugin is activated.
 	 *
@@ -256,64 +260,77 @@ class Funraise_For_Wordpress extends WP_Widget {
 
 	} // end register_widget_scripts
 
+    /**
+	 * Generates widget shortocde
+	 */
+	public static function funraise_widget_by_shortcode($atts) {
+    
+	    global $wp_widget_factory;
+	    
+	    extract(shortcode_atts(array(
+	        'form_id' => FALSE
+	    ), $atts));
+	    
+	    $widget_name = 'Funraise_For_Wordpress';
+	    
+	    if (!is_a($wp_widget_factory->widgets[$widget_name], 'WP_Widget')):
+	        $wp_class = 'WP_Widget_'.ucwords(strtolower($class));
+	        
+	        if (!is_a($wp_widget_factory->widgets[$wp_class], 'WP_Widget')):
+	            return '<p>'.sprintf(__("%s: Widget class not found. Make sure this widget exists and the class name is correct"),'<strong>'.$class.'</strong>').'</p>';
+	        else:
+	            $class = $wp_class;
+	        endif;
+	    endif;
+	    
+	    ob_start();
+	    the_widget($widget_name, $atts, array('widget_id'=>'arbitrary-instance-'.$id,
+	        'before_widget' => '',
+	        'after_widget' => '',
+	        'before_title' => '',
+	        'after_title' => ''
+	    ));
+	    $output = ob_get_contents();
+	    ob_end_clean();
+   		return $output;
+    
+	}
+
+    /**
+	 * Creates global settings menu page for plugin
+	 */
+	public static function funraise_plugin_create_menu() {
+		//create new top-level menu
+		add_menu_page('Funraise For Wordpress', 'Funraise', 'administrator', __FILE__, 
+			'Funraise_For_Wordpress::funraise_plugin_settings_page' , plugins_url('/images/icon.png', __FILE__) );
+		
+		//call register settings function
+		add_action( 'admin_init', 'Funraise_For_Wordpress::register_funraise_plugin_settings' );
+    }
+
+    /**
+	 * Registers settings available on plugin setup page
+	 */
+	public static function register_funraise_settings() {
+		//register our settings
+		register_setting( 'funraise-plugin-settings-group', 'organization_uuid' );
+
+	}
+
+    /**
+	 * Outputs settings page from settings.php
+	 */
+	public static function funraise_plugin_settings_page() {
+	    ob_start();
+		include( plugin_dir_path( __FILE__ ) . 'views/settings.php' );
+		$widget_settings .= ob_get_clean();
+		print $widget_settings;
+	}
+
 } // end class
 
-function funraise_widget($atts) {
-    
-    global $wp_widget_factory;
-    
-    extract(shortcode_atts(array(
-        'form_id' => FALSE
-    ), $atts));
-    
-    $widget_name = 'Funraise_For_Wordpress';
-    
-    if (!is_a($wp_widget_factory->widgets[$widget_name], 'WP_Widget')):
-        $wp_class = 'WP_Widget_'.ucwords(strtolower($class));
-        
-        if (!is_a($wp_widget_factory->widgets[$wp_class], 'WP_Widget')):
-            return '<p>'.sprintf(__("%s: Widget class not found. Make sure this widget exists and the class name is correct"),'<strong>'.$class.'</strong>').'</p>';
-        else:
-            $class = $wp_class;
-        endif;
-    endif;
-    
-    ob_start();
-    the_widget($widget_name, $atts, array('widget_id'=>'arbitrary-instance-'.$id,
-        'before_widget' => '',
-        'after_widget' => '',
-        'before_title' => '',
-        'after_title' => ''
-    ));
-    $output = ob_get_contents();
-    ob_end_clean();
-    return $output;
-    
-}
-add_shortcode('funraise','funraise_widget'); 
-
-add_action('admin_menu', 'funraise_create_menu');
-
-function funraise_create_menu() {
-	//create new top-level menu
-	add_menu_page('Funraise For Wordpress', 'Funraise', 'administrator', __FILE__, 'funraise_settings_page' , plugins_url('/images/icon.png', __FILE__) );
-	//call register settings function
-	add_action( 'admin_init', 'register_funraise_settings' );
-}
-
-function register_funraise_settings() {
-	//register our settings
-	register_setting( 'funraise-settings-group', 'organization_uuid' );
-
-}
-
-function funraise_settings_page() {
-    ob_start();
-	include( plugin_dir_path( __FILE__ ) . 'views/settings.php' );
-	$widget_settings .= ob_get_clean();
-	print $widget_settings;
-}
-
-
+add_shortcode('funraise-button','Funraise_For_Wordpress::funraise_button_by_shortcode'); 
+add_shortcode('funraise','Funraise_For_Wordpress::funraise_widget_by_shortcode'); 
+add_action('admin_menu', 'Funraise_For_Wordpress::funraise_plugin_create_menu');
 add_action( 'widgets_init', create_function( '', 'register_widget("Funraise_For_Wordpress");' ) );
 
