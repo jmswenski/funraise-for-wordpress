@@ -10,10 +10,14 @@ The Funraise For Wordpress plugin makes it easier to embed Funraise Giving Forms
 
 ## Usage
 
+[funraise form_id="11" structured_state_country="true" default_button="true" popup="true"]
+
+[funraise-button form_id="11" text="DONATE" amount="5"]
+
 
 ## License
 
-The Funraise For Salesforce plugin is licensed under the GPL v2 or later.
+The Funraise For Wordpress plugin is licensed under the GPL v2 or later.
 
 > This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License, version 2, as 
